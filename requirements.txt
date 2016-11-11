@@ -1,0 +1,7 @@
+flask-restplus
+scipy
+scikit-learn
+numpy
+nltk
+gunicorn
+gensim
