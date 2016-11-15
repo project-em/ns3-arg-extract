@@ -2,7 +2,7 @@ import os, logging, json
 import numpy as np
 import itertools
 import boto
-import boto.s3.connection
+from boto.s3.connection import S3Connection
 from flask import Flask, request, render_template, jsonify
 from flask_restplus import Api, Resource, fields
 from arg_extraction import ArgumentExtractionModel
@@ -20,12 +20,7 @@ AWS_FILE = os.getenv('AWS_FILE', 'GoogleNews-vectors-negative300.bin')
 wind_power_topic = "This house believes that wind power should be a primary focus of future energy supply"
 wind_power_file = "./arg-extract/data/wind_power.data"
 if not os.path.isfile(wind_power_file):
-	conn = boto.connect_s3(
-        aws_access_key_id = AWS_ACCESS,
-        aws_secret_access_key = AWS_SECRET,
-        is_secure=True,
-        calling_format = boto.s3.connection.OrdinaryCallingFormat(),
-        )
+	conn = S3Connection(AWS_ACCESS, AWS_SECRET)
 	bucket = conn.get_bucket(AWS_BUCKET)
 	bucket.get_key(AWS_FILE).get_contents_to_filename(wind_power_file)
 
