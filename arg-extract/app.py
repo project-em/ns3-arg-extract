@@ -1,17 +1,17 @@
-import os, logging, json
+import os, logging, json, boto
 import numpy as np
 import itertools
-import boto
-from boto.s3.connection import S3Connection
 from flask import Flask, request, render_template, jsonify
 from flask_restplus import Api, Resource, fields
 from arg_extraction import ArgumentExtractionModel
 from article_utils import split_sentences
+from boto.s3.connection import S3Connection
 
 ROOT_URL = os.getenv('ROOT_URL', 'localhost')
 VERSION_NO = os.getenv('VERSION_NO', '1.0')
 APP_NAME = os.getenv('APP_NAME', "Devil's Advocate Sentiment")
 DEBUG = os.getenv('DEBUG', False)
+
 AWS_ACCESS = os.getenv('AWS_ACCESS', '')
 AWS_SECRET = os.getenv('AWS_SECRET', '')
 AWS_BUCKET = os.getenv('AWS_BUCKET', 'ns3seniordesign')
@@ -19,10 +19,14 @@ AWS_FILE = os.getenv('AWS_FILE', 'GoogleNews-vectors-negative300.bin')
 
 wind_power_topic = "This house believes that wind power should be a primary focus of future energy supply"
 wind_power_file = "./arg-extract/data/wind_power.data"
+
+def pct_download(curr, total):
+	print '{0} out of {1} downloaded.'.format(curr, total)
+
 if not os.path.isfile(wind_power_file):
-	conn = S3Connection(AWS_ACCESS, AWS_SECRET)
+	conn = S3Connection(AWS_ACCESS, AWS_SECRET, host='s3.us-east-2.amazonaws.com')
 	bucket = conn.get_bucket(AWS_BUCKET)
-	bucket.get_key(AWS_FILE).get_contents_to_filename(wind_power_file)
+	bucket.get_key(AWS_FILE).get_contents_to_filename(wind_power_file[2:], cb=pct_download, num_cb=10)
 
 app = Flask(__name__)
 arg_model = ArgumentExtractionModel()
