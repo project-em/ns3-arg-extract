@@ -1,1 +1,1 @@
-web: gunicorn arg-extract.app:app -t 90 --log-file -  
+web: gunicorn arg-extract.app:app -t 3600 --log-file -  
