@@ -1,1 +1,1 @@
-web: gunicorn sentiment.app:app --log-file -  
+web: gunicorn arg-extract.app:app --log-file -  
