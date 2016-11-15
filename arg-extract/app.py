@@ -14,8 +14,8 @@ APP_NAME = os.getenv('APP_NAME', "Devil's Advocate Sentiment")
 DEBUG = os.getenv('DEBUG', False)
 AWS_ACCESS = os.getenv('AWS_ACCESS', '')
 AWS_SECRET = os.getenv('AWS_SECRET', '')
-AWS_BUCKET = os.getenv('AWS_BUCKET', '')
-AWS_FILE = os.getenv('AWS_FILE', 'wind_power.data')
+AWS_BUCKET = os.getenv('AWS_BUCKET', 'ns3seniordesign')
+AWS_FILE = os.getenv('AWS_FILE', 'GoogleNews-vectors-negative300.bin')
 
 wind_power_topic = "This house believes that wind power should be a primary focus of future energy supply"
 wind_power_file = "./arg-extract/data/wind_power.data"
@@ -26,7 +26,7 @@ if not os.path.isfile(wind_power_file):
         is_secure=True,
         calling_format = boto.s3.connection.OrdinaryCallingFormat(),
         )
-	bucket = conn.get_buck(AWS_BUCKET)
+	bucket = conn.get_bucket(AWS_BUCKET)
 	bucket.get_key(AWS_FILE).get_contents_to_filename(wind_power_file)
 
 app = Flask(__name__)
