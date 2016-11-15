@@ -1,4 +1,5 @@
 import os, logging, json
+import nltk
 import numpy as np
 import itertools
 from flask import Flask, request, render_template, jsonify
@@ -6,6 +7,7 @@ from flask_restplus import Api, Resource, fields
 from arg_extraction import ArgumentExtractionModel
 from article_utils import split_sentences
 
+NUM_SENTENCES = 10
 wind_power_topic = "This house believes that wind power should be a primary focus of future energy supply"
 wind_power_file = "./arg-extract/data/wind_power.data"
 
@@ -33,11 +35,12 @@ class Parse(Resource):
 		data = json.loads(request.data)
 		sentences = split_sentences(data['article'].encode('ascii', 'ignore'))
 		topics = list(itertools.repeat(wind_power_topic, len(sentences)))
-		top_sentences = arg_model.n_most_likely(topics, sentences, 4)
-		print top_sentences
-		return top_sentences[0]
+		top_sentences = arg_model.n_most_likely(topics, sentences, NUM_SENTENCES)
+		return json.dumps(top_sentences)
 
 def main():
+	nltk.download('averaged_perceptron_tagger')
+	nltk.download('punkt')
 	datafile = open(wind_power_file)
 	splitlines = [line.split('\t') for line in datafile.read().splitlines()]
 	sentences = [split[1].decode('utf-8', 'ignore')  for split in splitlines]
