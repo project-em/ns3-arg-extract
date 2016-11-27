@@ -4,9 +4,9 @@ from nlp_features import NlpFeatures
 
 class ArgumentExtractionModel:
 
-	def __init__(self):
+	def __init__(self, nlp_features):
 		self.clf = LogisticRegression()
-		self.nlp_features = NlpFeatures()
+		self.nlp_features = nlp_features
 
 	# y[i] = 1 if sentences[i] is a claim on topic[i], and 0 otherwise
 	def fit(self, topics, sentences, y):
@@ -22,8 +22,7 @@ class ArgumentExtractionModel:
 
 	# Returns the n most likely sentences as predicted by the model
 	def n_most_likely(self, topics, sentences, n):
-		print "sentence is: ", sentences
-		if (n < len(sentences)):
+		if (n > len(sentences)):
 			n = len(sentences)
 		features = self.nlp_features.featurize(topics, sentences)
 		# get the probability of the class being 1 for each sentence
@@ -35,8 +34,6 @@ class ArgumentExtractionModel:
 		sort_probs.sort(order='prob')
 		sort_probs = sort_probs[::-1]
 		print "sorted probs are: ", sort_probs
-		likely = []
-		for result in sort_probs[:n]:
-			likely.append(sentences[result['index']])
+		return sort_probs[:n]['index']
 
 		return likely

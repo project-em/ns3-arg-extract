@@ -5,7 +5,8 @@ import itertools
 from flask import Flask, request, render_template, jsonify
 from flask_restplus import Api, Resource, fields
 from arg_extraction import ArgumentExtractionModel
-from article_utils import split_sentences
+from nlp_features import NlpFeatures
+from article_utils import split_sentences, read_data_file
 from boto.s3.connection import S3Connection
 
 ROOT_URL = os.getenv('ROOT_URL', 'localhost')
@@ -19,20 +20,24 @@ AWS_BUCKET = os.getenv('AWS_BUCKET', 'ns3seniordesign')
 AWS_FILE = os.getenv('AWS_FILE', 'GoogleNews-vectors-negative300.bin')
 
 NUM_SENTENCES = 10
+lexicon_filepath = "./arg-extract/data/vader_sentiment_lexicon.txt"
+word2vec_filepath = "./arg-extract/data/GoogleNews-vectors-negative300.bin"
 wind_power_topic = "This house believes that wind power should be a primary focus of future energy supply"
-wind_power_file = "./arg-extract/data/wind_power.data"
+data_files_prefix = "./arg-extract/data/"
+data_files = ['wind_power.data']
 google_lib = 'arg-extract/data/GoogleNews-vectors-negative300.bin'
 
 def pct_download(curr, total):
 	print '{0} out of {1} downloaded.'.format(curr, total)
 
-if not os.path.isfile(wind_power_file):
+if not os.path.isfile(google_lib):
 	conn = S3Connection(AWS_ACCESS, AWS_SECRET, host='s3.us-east-2.amazonaws.com')
 	bucket = conn.get_bucket(AWS_BUCKET)
 	bucket.get_key(AWS_FILE).get_contents_to_filename(google_lib, cb=pct_download, num_cb=10)
 
 app = Flask(__name__)
-arg_model = ArgumentExtractionModel()
+nlp_features = NlpFeatures(word2vec_filepath, lexicon_filepath)
+arg_model = ArgumentExtractionModel(nlp_features)
 
 api = Api(app, version=VERSION_NO, title=APP_NAME)
 public_ns = api.namespace('api/v1', description='Public methods')
@@ -49,16 +54,23 @@ class Parse(Resource):
 		data = json.loads(request.data)
 		sentences = split_sentences(data['article'].encode('ascii', 'ignore'))
 		topics = list(itertools.repeat(wind_power_topic, len(sentences)))
-		top_sentences = arg_model.n_most_likely(topics, sentences, NUM_SENTENCES)
+		top_sentence_indices = arg_model.n_most_likely(topics, sentences, NUM_SENTENCES)
+		top_sentences = []
+		for s_index in top_sentence_indices:
+			top_sentences.append(sentences[s_index])
 		return json.dumps(top_sentences)
 
 def main():
 	nltk.download('averaged_perceptron_tagger')
 	nltk.download('punkt')
-	datafile = open(wind_power_file)
-	splitlines = [line.split('\t') for line in datafile.read().splitlines()]
-	sentences = [split[1].decode('utf-8', 'ignore')  for split in splitlines]
-	y = [int(split[2]) for split in splitlines]
+
+	sentences = []
+	y = []
+	for filename in data_files:
+		filename = data_files_prefix + filename
+		f_sentences, f_y = read_data_file(open(filename, 'r'))
+		sentences.extend(f_sentences)
+		y.extend(f_y)
 	topics = list(itertools.repeat(wind_power_topic, len(sentences)))
 	arg_model.fit(topics, sentences, y)
 	app.run()
