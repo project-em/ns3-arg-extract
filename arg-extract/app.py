@@ -57,7 +57,7 @@ class Parse(Resource):
 		top_sentences = []
 		for s_index in top_sentence_indices:
 			top_sentences.append(sentences[s_index])
-		return json.dumps(top_sentences)
+		return top_sentences
 
 def main():
 	nltk.download('averaged_perceptron_tagger')
@@ -80,7 +80,7 @@ def main():
 		train_y.extend(y)
 
 	arg_model.fit(train_topics, train_sentences, train_y)
-	app.run()
+	app.run(host="0.0.0.0", port=5000)
 
 if __name__ == '__main__':
 	main()
