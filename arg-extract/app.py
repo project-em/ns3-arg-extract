@@ -7,6 +7,7 @@ from flask_restplus import Api, Resource, fields
 from arg_extraction import ArgumentExtractionModel
 from nlp_features import NlpFeatures
 from article_utils import split_sentences, read_data_file
+from data_prep import make_topic_map
 from boto.s3.connection import S3Connection
 
 ROOT_URL = os.getenv('ROOT_URL', 'localhost')
@@ -22,9 +23,7 @@ AWS_FILE = os.getenv('AWS_FILE', 'GoogleNews-vectors-negative300.bin')
 NUM_SENTENCES = 10
 lexicon_filepath = "./arg-extract/data/vader_sentiment_lexicon.txt"
 word2vec_filepath = "./arg-extract/data/GoogleNews-vectors-negative300.bin"
-wind_power_topic = "This house believes that wind power should be a primary focus of future energy supply"
 data_files_prefix = "./arg-extract/data/"
-data_files = ['wind_power.data']
 google_lib = 'arg-extract/data/GoogleNews-vectors-negative300.bin'
 
 def pct_download(curr, total):
@@ -64,15 +63,23 @@ def main():
 	nltk.download('averaged_perceptron_tagger')
 	nltk.download('punkt')
 
-	sentences = []
-	y = []
-	for filename in data_files:
-		filename = data_files_prefix + filename
-		f_sentences, f_y = read_data_file(open(filename, 'r'))
-		sentences.extend(f_sentences)
-		y.extend(f_y)
-	topics = list(itertools.repeat(wind_power_topic, len(sentences)))
-	arg_model.fit(topics, sentences, y)
+	topic_files = make_topic_map("./arg-extract/data/selected_topics.txt", "./arg-extract/data/")
+	num_topics = len(topic_files)
+
+	print "loading files"
+	sentence_map = {topic: read_data_file(topic_file) for topic, topic_file in topic_files.items()}
+
+	train_sentences = []
+	train_topics = []
+	train_y = []
+	for topic in sentence_map:
+		sentences, y = sentence_map[topic]
+		topics = list(itertools.repeat(topic, len(sentences)))
+		train_sentences.extend(sentences)
+		train_topics.extend(topics)
+		train_y.extend(y)
+
+	arg_model.fit(train_topics, train_sentences, train_y)
 	app.run()
 
 if __name__ == '__main__':

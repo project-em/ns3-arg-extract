@@ -3,9 +3,7 @@ from collections import defaultdict
 from article_utils import split_sentences
 import re
 
-topic_prefix = "data/"
-
-def make_topic_map(topic_filename, write=False):
+def make_topic_map(topic_filename, topic_prefix, write=False):
 	if write:
 		mode = "w"
 	else:
@@ -16,12 +14,13 @@ def make_topic_map(topic_filename, write=False):
 	for line in topics[1:]:
 		split = line.split("\t")
 		topic = split[0]
-		file_name = split[1]
+		file_name = split[1].strip()
+		print "file name is:", file_name
 		topic_files[topic] = open(topic_prefix + file_name + ".data", mode)
 	return topic_files
 
 def prep_articles():
-	topic_files = make_topic_map("CE-EMNLP-2015.v3/topics.txt", write=True)
+	topic_files = make_topic_map("CE-EMNLP-2015.v3/topics.txt", "data/", write=True)
 
 	# store the claims by topic
 	claims_file = open("CE-EMNLP-2015.v3/claims.txt", "r")

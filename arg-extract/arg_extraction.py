@@ -33,7 +33,4 @@ class ArgumentExtractionModel:
 		# Sort and flip so highest probabilities come first
 		sort_probs.sort(order='prob')
 		sort_probs = sort_probs[::-1]
-		print "sorted probs are: ", sort_probs
 		return sort_probs[:n]['index']
-
-		return likely

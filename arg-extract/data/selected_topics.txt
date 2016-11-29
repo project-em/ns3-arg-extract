@@ -1,0 +1,11 @@
+Topic	filename
+This house believes that the sale of violent video games to minors should be banned	video_games
+This house supports the one-child policy of the republic of China	one_child
+This house would permit the use of performance enhancing drugs in professional sports	steroids
+This house believes the US is justified in using force to prevent states from acquiring nuclear weapons	nuclear
+This house believes in the use of affirmative action	affirmative_action
+This house believes that democratic governments should require voters to present photo identification at the polling station	voter_id
+This house would limit the right to bear arms	bear_arms
+This house believes that Holocaust denial should be a criminal offence	holocaust_denial
+This house believes that wind power should be a primary focus of future energy supply	wind_power
+This house believes that endangered species should be protected	endangered_species
