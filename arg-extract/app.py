@@ -26,6 +26,8 @@ word2vec_filepath = "./arg-extract/data/GoogleNews-vectors-negative300.bin"
 data_files_prefix = "./arg-extract/data/"
 google_lib = 'arg-extract/data/GoogleNews-vectors-negative300.bin'
 
+wind_power_topic = 'This house believes that wind power should be a primary focus of future energy supply'
+
 def pct_download(curr, total):
 	print '{0} out of {1} downloaded.'.format(curr, total)
 
