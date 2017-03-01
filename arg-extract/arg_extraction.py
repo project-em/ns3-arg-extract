@@ -1,11 +1,13 @@
 import numpy as np
 from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
 from nlp_features import NlpFeatures
 
 class ArgumentExtractionModel:
 
 	def __init__(self, nlp_features):
-		self.clf = LogisticRegression()
+		#self.clf = LogisticRegression()
+		self.clf = SVC(kernel='linear')
 		self.nlp_features = nlp_features
 
 	# y[i] = 1 if sentences[i] is a claim on topic[i], and 0 otherwise
@@ -26,11 +28,13 @@ class ArgumentExtractionModel:
 			n = len(sentences)
 		features = self.nlp_features.featurize(topics, sentences)
 		# get the probability of the class being 1 for each sentence
-		probabilities = self.clf.predict_proba(features)[:,1]
+		probabilities = self.clf.decision_function(features)
+		#probabilities = self.clf.predict_proba(features)[:,1]
 		tuples = zip(probabilities, np.arange(len(sentences)))
 		sort_probs = np.array(tuples, 
 			dtype=[('prob', 'float64'), ('index', 'int32')])
 		# Sort and flip so highest probabilities come first
 		sort_probs.sort(order='prob')
 		sort_probs = sort_probs[::-1]
+		print "sorted probs are: ", sort_probs
 		return sort_probs[:n]['index']

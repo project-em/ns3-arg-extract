@@ -23,7 +23,8 @@ def main():
 	nlp_features = NlpFeatures(word2vec_filepath, lexicon_filepath)
 	arg_model = ArgumentExtractionModel(nlp_features)
 
-	av_precs = np.zeros(len(topic_files))
+	av_precs = np.zeros(num_topics)
+	random_precs = np.zeros(num_topics)
 
 	for i, test_topic in enumerate(topic_files):
 		train_sentences = []
@@ -49,9 +50,15 @@ def main():
 		test_guesses = arg_model.n_most_likely(test_topics, test_sentences, 50)
 		av_precision = average_precision(test_correct, test_guesses, 50)
 		av_precs[i] = av_precision
+
+		random_guesses = np.random.choice(len(test_sentences), 50, replace=False)
+		av_precision_rand = average_precision(test_correct, random_guesses, 50)
+		random_precs[i] = av_precision_rand
 		print "Average Precision for topic ", test_topic, " is: ", av_precision
+		print "rand average precision is: ", av_precision_rand
 	
 	print "Mean average precision is: ", np.mean(av_precs)
+	print "Mean random average precision is: ", np.mean(random_precs)
 
 if __name__ == '__main__':
 	main()
